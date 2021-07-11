@@ -7,10 +7,10 @@ function App() {
   return (
     <div className="App container-fluid">
       <div className="row">
-        <div className="col-4 left-panel">
+        <div className="col-5 left-panel">
           <FileHeader onFileSearch={() => {}} />
         </div>
-        <div className="col-8 right-panel">right</div>
+        <div className="col-7 right-panel">right</div>
       </div>
     </div>
   )

@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
+
+// 雪碧图:
+// 1. 一张图片上拼接了很多小图片，根据每个图片的位置通过background-position来进行定位显示
+// 2. 不能缩放，不能通过css控制
+
+// Font Icon
+// 1. 通过字体的字符编码代替图标，通过特定的class+伪类的方式插入到浏览器中
+// 2. 本身就是字符，只能通过字符相关的css属性来控制样式
+// 3. 经常需要下载好几个大的字体文件，没用到的字体文件占用多余的空间
+// 4. 当文件加载失败的时候会有奇怪的bug，浏览器可能将这些图标渲染成奇怪的字符
+
+// SVG
+// 优势：可以通过任何的css属性来控制
 
 const FileSearch = ({ onFileSearch }) => {
   const [inputActive, setInputActive] = useState(false)
@@ -34,22 +49,22 @@ const FileSearch = ({ onFileSearch }) => {
   }, [inputActive])
 
   return (
-    <div className="alert alert-info">
+    <div className="alert alert-info d-flex justify-content-between align-items-center">
       {!inputActive ? (
-        <div className="d-flex justify-content-between align-items-center">
+        <>
           <span>我的云文档</span>
           <button
-            className="btn btn-primary"
+            className="icon-button"
             onClick={() => {
               setInputActive(true)
             }}
           >
-            搜索
+            <FontAwesomeIcon icon={faSearch} title="搜索" size="lg" />
           </button>
-        </div>
+        </>
       ) : (
-        <div className="row">
-          <div className="col-9">
+        <>
+          <div>
             <input
               ref={inputEl}
               className="form-control"
@@ -59,10 +74,10 @@ const FileSearch = ({ onFileSearch }) => {
               }}
             />
           </div>
-          <button className="btn btn-primary col-3" onClick={onCloseSearch}>
-            关闭
+          <button className="icon-button" onClick={onCloseSearch}>
+            <FontAwesomeIcon icon={faTimes} title="关闭" size="lg" />
           </button>
-        </div>
+        </>
       )}
     </div>
   )
