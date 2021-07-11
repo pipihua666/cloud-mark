@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
+import PropTypes from 'prop-types'
 
 // 雪碧图:
 // 1. 一张图片上拼接了很多小图片，根据每个图片的位置通过background-position来进行定位显示
@@ -15,7 +16,7 @@ import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 // SVG
 // 优势：可以通过任何的css属性来控制
 
-const FileSearch = ({ onFileSearch }) => {
+const FileSearch = ({ onFileSearch, title }) => {
   const [inputActive, setInputActive] = useState(false)
   const [value, setValue] = useState('')
   const inputEl = useRef(null)
@@ -52,7 +53,7 @@ const FileSearch = ({ onFileSearch }) => {
     <div className="alert alert-info d-flex justify-content-between align-items-center">
       {!inputActive ? (
         <>
-          <span>我的云文档</span>
+          <span>{title}</span>
           <button
             className="icon-button"
             onClick={() => {
@@ -81,6 +82,15 @@ const FileSearch = ({ onFileSearch }) => {
       )}
     </div>
   )
+}
+
+FileSearch.propTypes = {
+  onFileSearch: PropTypes.func.isRequired,
+  title: PropTypes.string
+}
+
+FileSearch.defaultProps = {
+  title: '我的云文档'
 }
 
 export default FileSearch

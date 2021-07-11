@@ -3,3 +3,7 @@
   border: none;
   color: inherit;
 }
+
+.file-link {
+  cursor: pointer;
+}
