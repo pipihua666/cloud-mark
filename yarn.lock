@@ -2924,6 +2924,11 @@ boolean@^3.0.1:
   resolved "https://registry.nlark.com/boolean/download/boolean-3.1.2.tgz#e30f210a26b02458482a8cc353ab06f262a780c2"
   integrity sha1-4w8hCiawJFhIKozDU6sG8mKngMI=
 
+bootstrap@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.nlark.com/bootstrap/download/bootstrap-5.0.2.tgz#aff23d5e0e03c31255ad437530ee6556e78e728e"
+  integrity sha1-r/I9Xg4DwxJVrUN1MO5lVueOco4=
+
 brace-expansion@^1.1.7:
   version "1.1.11"
   resolved "https://registry.npm.taobao.org/brace-expansion/download/brace-expansion-1.1.11.tgz#3c7fcbf529d87226f3d2f52b966ff5271eb441dd"
