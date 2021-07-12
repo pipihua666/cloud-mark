@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 import PropTypes from 'prop-types'
+import useKeyPress from '../../hooks/useKeyPress'
 
 // 雪碧图:
 // 1. 一张图片上拼接了很多小图片，根据每个图片的位置通过background-position来进行定位显示
@@ -20,27 +21,22 @@ const FileSearch = ({ onFileSearch, title }) => {
   const [inputActive, setInputActive] = useState(false)
   const [value, setValue] = useState('')
   const inputEl = useRef(null)
+  const isEnterPress = useKeyPress(13)
+  const isESCPress = useKeyPress(27)
 
-  const onCloseSearch = event => {
-    event.preventDefault()
+  const onCloseSearch = () => {
     setInputActive(false)
     setValue('')
   }
 
   // 添加esc和enter事件
   useEffect(() => {
-    const handleKeyUpEvent = event => {
-      if (event.keyCode === 13 && inputActive) {
-        onFileSearch(value)
-      } else if (event.keyCode === 27 && inputActive) {
-        onCloseSearch(event)
-      }
+    if (isEnterPress && inputActive) {
+      onFileSearch(value)
+    } else if (isESCPress && inputActive) {
+      onCloseSearch()
     }
-    document.addEventListener('keyup', handleKeyUpEvent)
-    return () => {
-      document.removeEventListener('keyup', handleKeyUpEvent)
-    }
-  }, [inputActive, value, onFileSearch])
+  }, [isEnterPress, isESCPress])
 
   // 编辑状态自动聚焦
   useEffect(() => {

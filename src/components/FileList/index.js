@@ -3,32 +3,28 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons'
 import PropTypes from 'prop-types'
+import useKeyPress from '../../hooks/useKeyPress'
 
 const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   const [editFileId, setEditFileId] = useState('') // 编辑的文件id
   const [value, setValue] = useState('') // 文件title文件框
   const inputEl = useRef(null)
+  const isEnterPress = useKeyPress(13)
+  const isESCPress = useKeyPress(27)
 
-  const onCloseSearch = event => {
-    event.preventDefault()
+  const onCloseSearch = () => {
     setEditFileId('')
     setValue('')
   }
 
   // 添加esc和enter事件
   useEffect(() => {
-    const handleKeyUpEvent = event => {
-      if (event.keyCode === 13 && editFileId) {
-        onSaveEdit(value)
-      } else if (event.keyCode === 27 && editFileId) {
-        onCloseSearch(event)
-      }
+    if (isEnterPress && editFileId) {
+      onSaveEdit(value)
+    } else if (isESCPress && editFileId) {
+      onCloseSearch()
     }
-    document.addEventListener('keyup', handleKeyUpEvent)
-    return () => {
-      document.removeEventListener('keyup', handleKeyUpEvent)
-    }
-  }, [editFileId, value, onSaveEdit])
+  }, [isEnterPress, isESCPress])
 
   // 编辑状态自动聚焦
   useEffect(() => {
