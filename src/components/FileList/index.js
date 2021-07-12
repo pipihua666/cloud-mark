@@ -33,13 +33,13 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
     }
   }, [editFileId])
   return (
-    <ul className="list-group list-group-flush file-list">
+    <ul className="list-group list-group-flush">
       {Array.isArray(files) &&
         files.length > 0 &&
         files.map(file => (
           <li
             key={file.id}
-            className="list-group-item file-item bg-light d-flex align-items-center row"
+            className="list-group-item file-item bg-light d-flex align-items-center"
           >
             {editFileId ? (
               <span className="col-10">

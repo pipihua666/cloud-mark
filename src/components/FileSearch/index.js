@@ -46,7 +46,7 @@ const FileSearch = ({ onFileSearch, title }) => {
   }, [inputActive])
 
   return (
-    <div className="alert alert-info d-flex justify-content-between align-items-center">
+    <div className="alert alert-info d-flex justify-content-between align-items-center mb-0">
       {!inputActive ? (
         <>
           <span>{title}</span>

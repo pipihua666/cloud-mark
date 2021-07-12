@@ -1,13 +1,15 @@
 import FileHeader from './components/FileSearch'
 import FileList from './components/FileList'
 import mocks from './fileMock'
+import ButtonBtn from './components/ButtomBtn'
+import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
 
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 function App() {
   return (
-    <div className="App container-fluid">
+    <div className="App container-fluid px-0">
       <div className="row">
         <div className="col-5 left-panel">
           <FileHeader onFileSearch={() => {}} />
@@ -23,6 +25,14 @@ function App() {
               console.log('file delete:', id)
             }}
           />
+          <div className="d-grid gap-2 d-md-flex justify-content-center mt-2">
+            <ButtonBtn icon={faPlus} text="新建" colorClass="btn-primary" />
+            <ButtonBtn
+              icon={faFileImport}
+              text="导入"
+              colorClass="btn-success"
+            />
+          </div>
         </div>
         <div className="col-7 right-panel">right</div>
       </div>
