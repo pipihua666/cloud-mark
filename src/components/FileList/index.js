@@ -20,7 +20,8 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   // 添加esc和enter事件
   useEffect(() => {
     if (isEnterPress && editFileId) {
-      onSaveEdit(value)
+      onSaveEdit(editFileId, value)
+      onCloseSearch()
     } else if (isESCPress && editFileId) {
       onCloseSearch()
     }
@@ -41,7 +42,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
             key={file.id}
             className="list-group-item file-item bg-light d-flex align-items-center"
           >
-            {editFileId ? (
+            {editFileId && editFileId === file.id ? (
               <span className="col-10">
                 <input
                   ref={inputEl}

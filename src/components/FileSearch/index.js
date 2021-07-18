@@ -1,3 +1,12 @@
+/*
+ * @Author: pipihua
+ * @Date: 2021-07-11 17:37:17
+ * @LastEditTime: 2021-07-18 15:54:41
+ * @LastEditors: pipihua
+ * @Description: 
+ * @FilePath: /cloud-mark/src/components/FileSearch/index.js
+ * 佛祖保佑永无BUG
+ */
 import React, { useState, useEffect, useRef } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
@@ -27,6 +36,7 @@ const FileSearch = ({ onFileSearch, title }) => {
   const onCloseSearch = () => {
     setInputActive(false)
     setValue('')
+    onFileSearch('')
   }
 
   // 添加esc和enter事件

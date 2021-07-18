@@ -1845,6 +1845,13 @@
   dependencies:
     "@types/tern" "*"
 
+"@types/codemirror@^0.0.88":
+  version "0.0.88"
+  resolved "https://registry.nlark.com/@types/codemirror/download/@types/codemirror-0.0.88.tgz#429e3462ce22865dc40cc1cb27862edaeda0bbab"
+  integrity sha1-Qp40Ys4ihl3EDMHLJ4Yu2u2gu6s=
+  dependencies:
+    "@types/tern" "*"
+
 "@types/eslint@^7.2.6":
   version "7.2.14"
   resolved "https://registry.nlark.com/@types/eslint/download/@types/eslint-7.2.14.tgz?cache=0&sync_timestamp=1625600480087&other_urls=https%3A%2F%2Fregistry.nlark.com%2F%40types%2Feslint%2Fdownload%2F%40types%2Feslint-7.2.14.tgz#088661518db0c3c23089ab45900b99dd9214b92a"
@@ -1914,6 +1921,11 @@
   version "7.0.8"
   resolved "https://registry.nlark.com/@types/json-schema/download/@types/json-schema-7.0.8.tgz#edf1bf1dbf4e04413ca8e5b17b3b7d7d54b59818"
   integrity sha1-7fG/Hb9OBEE8qOWxezt9fVS1mBg=
+
+"@types/marked@^0.7.4":
+  version "0.7.4"
+  resolved "https://registry.nlark.com/@types/marked/download/@types/marked-0.7.4.tgz#607685669bb1bbde2300bc58ba43486cbbee1f0a"
+  integrity sha1-YHaFZpuxu94jALxYukNIbLvuHwo=
 
 "@types/marked@^2.0.2":
   version "2.0.4"
@@ -4607,7 +4619,7 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-easymde@^2.15.0:
+easymde@^2.10.1, easymde@^2.15.0:
   version "2.15.0"
   resolved "https://registry.nlark.com/easymde/download/easymde-2.15.0.tgz#73667c4879d8687b07651d6259ee652bba5d0b00"
   integrity sha1-c2Z8SHnYaHsHZR1iWe5lK7pdCwA=
@@ -9902,13 +9914,14 @@ react-scripts@4.0.3:
   optionalDependencies:
     fsevents "^2.1.3"
 
-react-simplemde-editor@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.nlark.com/react-simplemde-editor/download/react-simplemde-editor-5.0.1.tgz#f9157e640be2c5ca7c8e236f9d138d5e6adb21cb"
-  integrity sha1-+RV+ZAvixcp8jiNvnRONXmrbIcs=
+react-simplemde-editor@^4.1.0:
+  version "4.1.5"
+  resolved "https://registry.nlark.com/react-simplemde-editor/download/react-simplemde-editor-4.1.5.tgz#e9cff9b161a0127b7af2acd583e66a279ca8d08c"
+  integrity sha1-6c/5sWGgEnt68qzVg+ZqJ5yo0Iw=
   dependencies:
-    "@types/codemirror" "0.0.109"
-    "@types/marked" "^2.0.2"
+    "@types/codemirror" "^0.0.88"
+    "@types/marked" "^0.7.4"
+    easymde "^2.10.1"
 
 react@^17.0.2:
   version "17.0.2"

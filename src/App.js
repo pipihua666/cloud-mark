@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-15 23:15:28
+ * @LastEditTime: 2021-07-18 16:07:35
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -21,29 +21,42 @@ import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 function App() {
-  const [files, setFiles] = useState({})
+  const [files, setFiles] = useState(mocks)
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
+  const [searchedFiles, setSearchedFiles] = useState([])
   const activeFile = files[activeFileID]
   const openedFiles = openedFileIDs.map(openID => {
     return files[openID]
   })
+  const fileListArr = searchedFiles?.length > 0 ? searchedFiles : files
 
   const fileChange = (id, value) => {
-    if (value !== files[id].body) {
-      const newFile = { ...files[id], body: value }
-      setFiles({ ...files, [id]: newFile })
-      // update unsavedIDs
-      if (!unsavedFileIDs.includes(id)) {
-        setUnsavedFileIDs([...unsavedFileIDs, id])
+    const newFiles = files.map(file => {
+      if (file.id === id) {
+        file.body = value
       }
+      return file
+    })
+    setFiles(newFiles)
+    if (!unsavedFileIDs.includes(id)) {
+      setUnsavedFileIDs([...unsavedFileIDs, id])
     }
   }
 
   const tabClick = fileID => {
     // set current active file
     setActiveFileID(fileID)
+  }
+
+  const fileClick = fileID => {
+    // set current active file
+    setActiveFileID(fileID)
+    // then add new fileID to openedFiles
+    if (!openedFileIDs.includes(fileID)) {
+      setOpenedFileIDs([...openedFileIDs, fileID])
+    }
   }
 
   const tabClose = id => {
@@ -58,22 +71,38 @@ function App() {
     }
   }
 
+  const deleteFile = id => {
+    const newFiles = files.filter(file => file.id !== id)
+    setFiles(newFiles)
+    tabClose(id)
+  }
+
+  const fileSearch = keyword => {
+    // filter out the new files based on the keyword
+    const newFiles = files.filter(file => file.title.includes(keyword))
+    setSearchedFiles(newFiles)
+  }
+
+  const updateFileName = (id, title) => {
+    const newFiles = files.filter(file => {
+      if (file.id === id) {
+        file.title = title
+      }
+      return file
+    })
+    setFiles(newFiles)
+  }
+
   return (
     <div className="App container-fluid px-0">
       <div className="row">
         <div className="col-5 left-panel">
-          <FileHeader onFileSearch={() => {}} />
+          <FileHeader onFileSearch={fileSearch} />
           <FileList
-            files={mocks}
-            onFileClick={id => {
-              console.log('file click:', id)
-            }}
-            onSaveEdit={id => {
-              console.log('file save:', id)
-            }}
-            onFileDelete={id => {
-              console.log('file delete:', id)
-            }}
+            files={fileListArr}
+            onFileClick={fileClick}
+            onSaveEdit={updateFileName}
+            onFileDelete={deleteFile}
           />
           <div className="d-grid gap-2 d-md-flex justify-content-center mt-2 button-group">
             <ButtonBtn icon={faPlus} text="新建" colorClass="btn-primary" />
