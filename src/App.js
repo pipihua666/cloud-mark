@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-18 16:50:33
+ * @LastEditTime: 2021-07-18 17:14:43
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -17,30 +17,30 @@ import TabList from './components/TabList'
 import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
 import SimpleMDE from 'react-simplemde-editor'
 import 'easymde/dist/easymde.min.css'
-
+import { flattenArr, objToArr } from './utils/hepler'
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 function App() {
-  const [files, setFiles] = useState(mocks)
+  const [files, setFiles] = useState(flattenArr(mocks))
   const [activeFileID, setActiveFileID] = useState('')
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
   const [searchedFiles, setSearchedFiles] = useState([])
-  const activeFile = files.find(file => file.id === activeFileID)
+  const activeFile = files[activeFileID]
   const openedFiles = openedFileIDs.map(openID => {
-    return files.find(file => file.id === openID)
+    return files[openID]
   })
-  const fileListArr = searchedFiles?.length > 0 ? searchedFiles : files
+  const filesArr = objToArr(files)
+  const fileListArr = searchedFiles?.length > 0 ? searchedFiles : filesArr
 
   const fileChange = (id, value) => {
-    const newFiles = files.map(file => {
-      if (file.id === id) {
-        file.body = value
-      }
-      return file
+    const newFile = files[id]
+    newFile.body = value
+    setFiles({
+      ...files,
+      [id]: newFile
     })
-    setFiles(newFiles)
     if (!unsavedFileIDs.includes(id)) {
       setUnsavedFileIDs([...unsavedFileIDs, id])
     }
@@ -73,41 +73,41 @@ function App() {
   }
 
   const deleteFile = id => {
-    const newFiles = files.filter(file => file.id !== id)
-    setFiles(newFiles)
+    delete files[id]
+    setFiles(files)
     tabClose(id)
   }
 
   const fileSearch = keyword => {
     // filter out the new files based on the keyword
-    const newFiles = files.filter(file => file.title.includes(keyword))
+    const newFiles = filesArr.filter(file => file.title.includes(keyword))
     setSearchedFiles(newFiles)
   }
 
   const updateFileName = (id, title) => {
-    const newFiles = files.filter(file => {
-      if (file.id === id) {
-        file.title = title
-        file.isNew = false
-      }
-      return file
+    const newFile = files[id]
+    newFile.title = title
+    newFile.isNew = false
+    setFiles({
+      ...files,
+      [id]: newFile
     })
-    setFiles(newFiles)
   }
 
   const createNewFile = () => {
     const newID = uuidv4()
-    const newFiles = [
+    const newFiles = {
+      id: newID,
+      title: '',
+      body: '## 请输入Markdown',
+      createdAt: new Date().getTime(),
+      isNew: true
+    }
+
+    setFiles({
       ...files,
-      {
-        id: newID,
-        title: '',
-        body: '## 请输入Markdown',
-        createdAt: new Date().getTime(),
-        isNew: true
-      }
-    ]
-    setFiles(newFiles)
+      [newID]: newFiles
+    })
   }
 
   return (
