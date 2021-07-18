@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-18 16:07:35
+ * @LastEditTime: 2021-07-18 16:50:33
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -12,6 +12,7 @@ import FileHeader from './components/FileSearch'
 import FileList from './components/FileList'
 import mocks from './fileMock'
 import ButtonBtn from './components/ButtomBtn'
+import { v4 as uuidv4 } from 'uuid'
 import TabList from './components/TabList'
 import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
 import SimpleMDE from 'react-simplemde-editor'
@@ -26,9 +27,9 @@ function App() {
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
   const [searchedFiles, setSearchedFiles] = useState([])
-  const activeFile = files[activeFileID]
+  const activeFile = files.find(file => file.id === activeFileID)
   const openedFiles = openedFileIDs.map(openID => {
-    return files[openID]
+    return files.find(file => file.id === openID)
   })
   const fileListArr = searchedFiles?.length > 0 ? searchedFiles : files
 
@@ -87,9 +88,25 @@ function App() {
     const newFiles = files.filter(file => {
       if (file.id === id) {
         file.title = title
+        file.isNew = false
       }
       return file
     })
+    setFiles(newFiles)
+  }
+
+  const createNewFile = () => {
+    const newID = uuidv4()
+    const newFiles = [
+      ...files,
+      {
+        id: newID,
+        title: '',
+        body: '## 请输入Markdown',
+        createdAt: new Date().getTime(),
+        isNew: true
+      }
+    ]
     setFiles(newFiles)
   }
 
@@ -105,7 +122,12 @@ function App() {
             onFileDelete={deleteFile}
           />
           <div className="d-grid gap-2 d-md-flex justify-content-center mt-2 button-group">
-            <ButtonBtn icon={faPlus} text="新建" colorClass="btn-primary" />
+            <ButtonBtn
+              icon={faPlus}
+              text="新建"
+              colorClass="btn-primary"
+              onBtnClick={createNewFile}
+            />
             <ButtonBtn
               icon={faFileImport}
               text="导入"
