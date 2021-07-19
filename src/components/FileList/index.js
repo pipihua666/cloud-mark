@@ -11,11 +11,12 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   const inputEl = useRef(null)
   const isEnterPress = useKeyPress(13)
   const isESCPress = useKeyPress(27)
+  const editItem = files.find(file => file.id === editFileId)
 
   const onCloseSearch = () => {
     setEditFileId('')
     setValue('')
-    const editItem = files.find(file => file.id === editFileId)
+
     if (editItem && editItem.isNew) {
       onFileDelete(editFileId)
     }
@@ -24,7 +25,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   // 添加esc和enter事件
   useEffect(() => {
     if (isEnterPress && editFileId) {
-      onSaveEdit(editFileId, value)
+      onSaveEdit(editFileId, value, editItem.isNew)
       onCloseSearch()
     } else if (isESCPress && editFileId) {
       onCloseSearch()

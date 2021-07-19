@@ -1,38 +1,50 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-18 17:14:43
+ * @LastEditTime: 2021-07-19 23:23:15
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
  * 佛祖保佑永无BUG
  */
 import { useState } from 'react'
-import FileHeader from './components/FileSearch'
-import FileList from './components/FileList'
-import mocks from './fileMock'
-import ButtonBtn from './components/ButtomBtn'
+import ButtonBtn from './components/ButtonBtn'
 import { v4 as uuidv4 } from 'uuid'
-import TabList from './components/TabList'
-import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faFileImport, faSave } from '@fortawesome/free-solid-svg-icons'
 import SimpleMDE from 'react-simplemde-editor'
 import 'easymde/dist/easymde.min.css'
-import { flattenArr, objToArr } from './utils/hepler'
+
+import FileHeader from './components/FileSearch'
+import TabList from './components/TabList'
+import FileList from './components/FileList'
+import mocks from './fileMock'
+import fileHelper from './utils/fileHelper'
+import { flattenArr, objToArr } from './utils/helper'
+
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
+const { join } = window.require('path')
+const { app } = window.require('@electron/remote')
+
 function App() {
   const [files, setFiles] = useState(flattenArr(mocks))
-  const [activeFileID, setActiveFileID] = useState('')
+  // 打开的文件ids
   const [openedFileIDs, setOpenedFileIDs] = useState([])
+  // 没有保存的文件ids
   const [unsavedFileIDs, setUnsavedFileIDs] = useState([])
+  // 搜索出的文件列表
   const [searchedFiles, setSearchedFiles] = useState([])
+  // 正在编辑的文件id
+  const [activeFileID, setActiveFileID] = useState('')
   const activeFile = files[activeFileID]
   const openedFiles = openedFileIDs.map(openID => {
     return files[openID]
   })
+  // TabList,FileList使用数组
   const filesArr = objToArr(files)
   const fileListArr = searchedFiles?.length > 0 ? searchedFiles : filesArr
+  const saveLocation = app.getPath('documents')
 
   const fileChange = (id, value) => {
     const newFile = files[id]
@@ -73,9 +85,13 @@ function App() {
   }
 
   const deleteFile = id => {
-    delete files[id]
-    setFiles(files)
-    tabClose(id)
+    fileHelper
+      .deleteFile(join(saveLocation, `${files[id].title}.md`))
+      .then(() => {
+        delete files[id]
+        setFiles(files)
+        tabClose(id)
+      })
   }
 
   const fileSearch = keyword => {
@@ -84,14 +100,31 @@ function App() {
     setSearchedFiles(newFiles)
   }
 
-  const updateFileName = (id, title) => {
-    const newFile = files[id]
-    newFile.title = title
-    newFile.isNew = false
-    setFiles({
-      ...files,
-      [id]: newFile
-    })
+  const updateFileName = (id, title, isNew) => {
+    const newFile = { ...files[id], title, isNew: false }
+    console.log('title', title)
+    if (isNew) {
+      fileHelper
+        .writeFile(join(saveLocation, `${title}.md`), files[id].body)
+        .then(() => {
+          setFiles({
+            ...files,
+            [id]: newFile
+          })
+        })
+    } else {
+      fileHelper
+        .renameFile(
+          join(saveLocation, `${files[id].title}.md`),
+          join(saveLocation, `${title}.md`)
+        )
+        .then(() => {
+          setFiles({
+            ...files,
+            [id]: newFile
+          })
+        })
+    }
   }
 
   const createNewFile = () => {
@@ -108,6 +141,14 @@ function App() {
       ...files,
       [newID]: newFiles
     })
+  }
+
+  const saveCurrentFile = () => {
+    fileHelper
+      .writeFile(join(saveLocation, `${activeFile.title}.md`), activeFile.body)
+      .then(() => {
+        setUnsavedFileIDs(filesArr.filter(id => id !== activeFile.id))
+      })
   }
 
   return (
@@ -157,6 +198,12 @@ function App() {
                 options={{
                   minHeight: '515px'
                 }}
+              />
+              <ButtonBtn
+                icon={faSave}
+                text="保存"
+                colorClass="btn-success"
+                onBtnClick={saveCurrentFile}
               />
             </>
           )}

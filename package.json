@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@electron/remote": "^1.2.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
@@ -15,7 +16,7 @@
     "concurrently": "^6.2.0",
     "cross-env": "^7.0.3",
     "easymde": "^2.15.0",
-    "electron": "^13.1.6",
+    "electron": "^13.1.7",
     "electron-is-dev": "^2.0.0",
     "node-sass": "^6.0.1",
     "react": "^17.0.2",
