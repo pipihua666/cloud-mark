@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-19 23:23:15
+ * @LastEditTime: 2021-07-28 23:38:18
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -17,18 +17,34 @@ import 'easymde/dist/easymde.min.css'
 import FileHeader from './components/FileSearch'
 import TabList from './components/TabList'
 import FileList from './components/FileList'
-import mocks from './fileMock'
 import fileHelper from './utils/fileHelper'
-import { flattenArr, objToArr } from './utils/helper'
+import { objToArr } from './utils/helper'
 
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 const { join } = window.require('path')
 const { app } = window.require('@electron/remote')
+const Store = window.require('electron-store')
+
+const fileStore = new Store({ name: 'FileData' })
+
+const saveFilesToStore = files => {
+  const fileStoreObj = objToArr(files).reduce((result, currentFile) => {
+    const { id, title, path, createdAt } = currentFile
+    result[id] = {
+      id,
+      path,
+      title,
+      createdAt
+    }
+    return result
+  }, {})
+  fileStore.set('files', fileStoreObj)
+}
 
 function App() {
-  const [files, setFiles] = useState(flattenArr(mocks))
+  const [files, setFiles] = useState(fileStore.get('files') || {})
   // 打开的文件ids
   const [openedFileIDs, setOpenedFileIDs] = useState([])
   // 没有保存的文件ids
@@ -90,6 +106,7 @@ function App() {
       .then(() => {
         delete files[id]
         setFiles(files)
+        saveFilesToStore(files)
         tabClose(id)
       })
   }
@@ -101,29 +118,20 @@ function App() {
   }
 
   const updateFileName = (id, title, isNew) => {
-    const newFile = { ...files[id], title, isNew: false }
-    console.log('title', title)
+    const newPath = join(saveLocation, `${title}.md`)
+    const modifiedFile = { ...files[id], title, isNew: false, path: newPath }
+    const newFiles = { ...files, [id]: modifiedFile }
     if (isNew) {
-      fileHelper
-        .writeFile(join(saveLocation, `${title}.md`), files[id].body)
-        .then(() => {
-          setFiles({
-            ...files,
-            [id]: newFile
-          })
-        })
+      fileHelper.writeFile(newPath, files[id].body).then(() => {
+        setFiles(newFiles)
+        saveFilesToStore(newFiles)
+      })
     } else {
-      fileHelper
-        .renameFile(
-          join(saveLocation, `${files[id].title}.md`),
-          join(saveLocation, `${title}.md`)
-        )
-        .then(() => {
-          setFiles({
-            ...files,
-            [id]: newFile
-          })
-        })
+      const oldPath = join(saveLocation, `${files[id].title}.md`)
+      fileHelper.renameFile(oldPath, newPath).then(() => {
+        setFiles(newFiles)
+        saveFilesToStore(newFiles)
+      })
     }
   }
 

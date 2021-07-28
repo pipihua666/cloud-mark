@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:42:48
- * @LastEditTime: 2021-07-19 23:24:54
+ * @LastEditTime: 2021-07-28 23:40:36
  * @LastEditors: pipihua
  * @Description: electron主进程
  * @FilePath: /cloud-mark/main.js
@@ -9,6 +9,8 @@
  */
 const { app, BrowserWindow, globalShortcut } = require('electron')
 const isDev = require('electron-is-dev')
+const Store = require('electron-store')
+Store.initRenderer()
 
 // 12版本的electron已经去抽了5版本的remote
 require('@electron/remote/main').initialize()
