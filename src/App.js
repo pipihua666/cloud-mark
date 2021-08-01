@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-01 21:38:07
+ * @LastEditTime: 2021-08-01 23:01:00
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -18,18 +18,18 @@ import FileHeader from './components/FileSearch'
 import TabList from './components/TabList'
 import FileList from './components/FileList'
 import fileHelper from './utils/fileHelper'
-import { objToArr } from './utils/helper'
+import { objToArr, flattenArr } from './utils/helper'
 
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-const { join } = window.require('path')
-const { app } = window.require('@electron/remote')
+const { join, basename, dirname, extname } = window.require('path')
+const { app, dialog } = window.require('@electron/remote')
 const Store = window.require('electron-store')
 
 const fileStore = new Store({ name: 'FileData' })
 
-const saveFilesToStore = files => {
+const saveFilesToStore = (files = {}) => {
   const fileStoreObj = objToArr(files).reduce((result, currentFile) => {
     const { id, title, path, createdAt } = currentFile
     result[id] = {
@@ -121,7 +121,7 @@ function App() {
     }
     // delete exist file
     fileHelper
-      .deleteFile(join(saveLocation, `${files[id].title}.md`))
+      .deleteFile(files[id].path)
       .then(() => {
         setFiles(otherFiles)
         saveFilesToStore(otherFiles)
@@ -140,8 +140,12 @@ function App() {
   }
 
   const updateFileName = async (id, title, isNew) => {
-    const newPath = join(saveLocation, `${title}.md`)
-    if (isExistsFile(id)) {
+    // 如果是新建，保存路径为app.getPath('documents')
+    // 如果是更新名称，保存路径为file.path
+    const newPath = isNew
+      ? join(saveLocation, `${title}.md`)
+      : join(dirname(files[id].path), `${title}.md`)
+    if (objToArr(files).some(file => file.path === newPath)) {
       alert('文件名已存在')
       return
     }
@@ -153,8 +157,7 @@ function App() {
         saveFilesToStore(newFiles)
       })
     } else {
-      const oldPath = join(saveLocation, `${files[id].title}.md`)
-      fileHelper.renameFile(oldPath, newPath).then(() => {
+      fileHelper.renameFile(files[id].path, newPath).then(() => {
         setFiles(newFiles)
         saveFilesToStore(newFiles)
       })
@@ -178,10 +181,53 @@ function App() {
   }
 
   const saveCurrentFile = () => {
-    const filePath = join(saveLocation, `${activeFile.title}.md`)
-    fileHelper.writeFile(filePath, activeFile.body).then(() => {
+    fileHelper.writeFile(activeFile.path, activeFile.body).then(() => {
       setUnsavedFileIDs(filesArr.filter(id => id !== activeFile.id))
     })
+  }
+
+  const importFile = () => {
+    dialog
+      .showOpenDialog({
+        filters: [
+          {
+            name: 'my markdown file',
+            extensions: ['md']
+          }
+        ],
+        title: '请选择要导入的 Markdown 文件',
+        properties: ['openFile', 'multiSelections']
+      })
+      .then(result => {
+        if (Array.isArray(result.filePaths)) {
+          // 过滤已经存在的文件
+          const filterPaths = result.filePaths.filter(path => {
+            const alreadyAdded = Object.values(files).find(
+              file => file.path === path
+            )
+            return !alreadyAdded
+          })
+          // 构造新的文件到files中
+          const newFilesArr = filterPaths.map(path => {
+            return {
+              id: uuidv4(),
+              path,
+              title: basename(path, extname(path))
+            }
+          })
+          // 把结果保存到electron store中
+          const newFiles = { ...files, ...flattenArr(newFilesArr) }
+          setFiles(newFiles)
+          saveFilesToStore(newFiles)
+          if (newFilesArr.length > 0) {
+            dialog.showMessageBox({
+              type: 'info',
+              title: `成功导入了${newFilesArr.length}个文件`,
+              message: `成功导入了${newFilesArr.length}个文件`
+            })
+          }
+        }
+      })
   }
 
   return (
@@ -206,6 +252,7 @@ function App() {
               icon={faFileImport}
               text="导入"
               colorClass="btn-success"
+              onBtnClick={importFile}
             />
           </div>
         </div>
