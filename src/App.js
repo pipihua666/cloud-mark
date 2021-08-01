@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-07-28 23:38:18
+ * @LastEditTime: 2021-08-01 21:38:07
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -74,6 +74,10 @@ function App() {
     }
   }
 
+  const isExistsFile = fileId => {
+    return !!files[fileId]
+  }
+
   const tabClick = fileID => {
     // set current active file
     setActiveFileID(fileID)
@@ -85,6 +89,14 @@ function App() {
     // then add new fileID to openedFiles
     if (!openedFileIDs.includes(fileID)) {
       setOpenedFileIDs([...openedFileIDs, fileID])
+    }
+    // set file body
+    const currentFile = files[fileID]
+    if (!currentFile.isLoaded) {
+      fileHelper.readFile(currentFile.path).then(value => {
+        const newFile = { ...currentFile, isLoaded: true, body: value }
+        setFiles({ ...files, [fileID]: newFile })
+      })
     }
   }
 
@@ -101,13 +113,23 @@ function App() {
   }
 
   const deleteFile = id => {
+    const { [id]: deletedFile, ...otherFiles } = files
+    // delete new file
+    if (files[id].isNew) {
+      setFiles(otherFiles)
+      return
+    }
+    // delete exist file
     fileHelper
       .deleteFile(join(saveLocation, `${files[id].title}.md`))
       .then(() => {
-        delete files[id]
-        setFiles(files)
-        saveFilesToStore(files)
+        setFiles(otherFiles)
+        saveFilesToStore(otherFiles)
         tabClose(id)
+      })
+      .catch(() => {
+        alert('文件不存在')
+        setFiles(otherFiles)
       })
   }
 
@@ -117,8 +139,12 @@ function App() {
     setSearchedFiles(newFiles)
   }
 
-  const updateFileName = (id, title, isNew) => {
+  const updateFileName = async (id, title, isNew) => {
     const newPath = join(saveLocation, `${title}.md`)
+    if (isExistsFile(id)) {
+      alert('文件名已存在')
+      return
+    }
     const modifiedFile = { ...files[id], title, isNew: false, path: newPath }
     const newFiles = { ...files, [id]: modifiedFile }
     if (isNew) {
@@ -152,11 +178,10 @@ function App() {
   }
 
   const saveCurrentFile = () => {
-    fileHelper
-      .writeFile(join(saveLocation, `${activeFile.title}.md`), activeFile.body)
-      .then(() => {
-        setUnsavedFileIDs(filesArr.filter(id => id !== activeFile.id))
-      })
+    const filePath = join(saveLocation, `${activeFile.title}.md`)
+    fileHelper.writeFile(filePath, activeFile.body).then(() => {
+      setUnsavedFileIDs(filesArr.filter(id => id !== activeFile.id))
+    })
   }
 
   return (
