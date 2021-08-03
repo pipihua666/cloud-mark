@@ -139,7 +139,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                 >
                   {file.title}
                 </span>
-                <button
+                {/* <button
                   className="icon-button col-1"
                   onClick={() => renameFile(file)}
                 >
@@ -150,7 +150,7 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                   onClick={() => deleteFile(file)}
                 >
                   <FontAwesomeIcon icon={faTrash} title="删除" />
-                </button>
+                </button> */}
               </>
             )}
           </li>

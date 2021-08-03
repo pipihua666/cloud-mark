@@ -1,9 +1,9 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-11 17:37:17
- * @LastEditTime: 2021-07-18 15:54:41
+ * @LastEditTime: 2021-08-03 23:37:30
  * @LastEditors: pipihua
- * @Description: 
+ * @Description:
  * @FilePath: /cloud-mark/src/components/FileSearch/index.js
  * 佛祖保佑永无BUG
  */
@@ -12,6 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faTimes } from '@fortawesome/free-solid-svg-icons'
 import PropTypes from 'prop-types'
 import useKeyPress from '../../hooks/useKeyPress'
+import useIpcRenderer from '../../hooks/useIpcRenderer'
 
 // 雪碧图:
 // 1. 一张图片上拼接了很多小图片，根据每个图片的位置通过background-position来进行定位显示
@@ -39,6 +40,14 @@ const FileSearch = ({ onFileSearch, title }) => {
     onFileSearch('')
   }
 
+  const openSearch = () => {
+    setInputActive(true)
+  }
+
+  useIpcRenderer({
+    'search-file': openSearch
+  })
+
   // 添加esc和enter事件
   useEffect(() => {
     if (isEnterPress && inputActive) {
@@ -60,12 +69,7 @@ const FileSearch = ({ onFileSearch, title }) => {
       {!inputActive ? (
         <>
           <span>{title}</span>
-          <button
-            className="icon-button"
-            onClick={() => {
-              setInputActive(true)
-            }}
-          >
+          <button className="icon-button" onClick={openSearch}>
             <FontAwesomeIcon icon={faSearch} title="搜索" size="lg" />
           </button>
         </>

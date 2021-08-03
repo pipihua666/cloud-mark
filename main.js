@@ -1,15 +1,17 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:42:48
- * @LastEditTime: 2021-07-28 23:40:36
+ * @LastEditTime: 2021-08-03 23:20:18
  * @LastEditors: pipihua
  * @Description: electron主进程
  * @FilePath: /cloud-mark/main.js
  * 佛祖保佑永无BUG
  */
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const { app, BrowserWindow, globalShortcut, Menu } = require('electron')
 const isDev = require('electron-is-dev')
+const menuTemplate = require('./template/menuTemplate')
 const Store = require('electron-store')
+// 10以上的版本需要初始化
 Store.initRenderer()
 
 // 12版本的electron已经去抽了5版本的remote
@@ -33,4 +35,7 @@ app.on('ready', () => {
   globalShortcut.register('CommandOrControl+Shift+i', function () {
     mainWindow.webContents.openDevTools({ mode: 'bottom' })
   })
+  // set the menu
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
 })

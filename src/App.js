@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-03 22:55:58
+ * @LastEditTime: 2021-08-03 23:54:24
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -19,6 +19,7 @@ import TabList from './components/TabList'
 import FileList from './components/FileList'
 import fileHelper from './utils/fileHelper'
 import { objToArr, flattenArr } from './utils/helper'
+import useIpcRenderer from './hooks/useIpcRenderer'
 
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -63,14 +64,16 @@ function App() {
   const saveLocation = app.getPath('documents')
 
   const fileChange = (id, value) => {
-    const newFile = files[id]
-    newFile.body = value
-    setFiles({
-      ...files,
-      [id]: newFile
-    })
-    if (!unsavedFileIDs.includes(id)) {
-      setUnsavedFileIDs([...unsavedFileIDs, id])
+    if (value !== files[id].body) {
+      const newFile = files[id]
+      newFile.body = value
+      setFiles({
+        ...files,
+        [id]: newFile
+      })
+      if (!unsavedFileIDs.includes(id)) {
+        setUnsavedFileIDs([...unsavedFileIDs, id])
+      }
     }
   }
 
@@ -226,6 +229,12 @@ function App() {
       })
   }
 
+  useIpcRenderer({
+    'create-new-file': createNewFile,
+    'import-file': importFile,
+    'save-edit-file': saveCurrentFile
+  })
+
   return (
     <div className="App container-fluid px-0">
       <div className="row">
@@ -271,15 +280,6 @@ function App() {
                 onChange={value => {
                   fileChange(activeFile.id, value)
                 }}
-                options={{
-                  minHeight: '515px'
-                }}
-              />
-              <ButtonBtn
-                icon={faSave}
-                text="保存"
-                colorClass="btn-success"
-                onBtnClick={saveCurrentFile}
               />
             </>
           )}
