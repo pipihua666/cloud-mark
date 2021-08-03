@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-01 23:01:00
+ * @LastEditTime: 2021-08-03 22:55:58
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -72,10 +72,6 @@ function App() {
     if (!unsavedFileIDs.includes(id)) {
       setUnsavedFileIDs([...unsavedFileIDs, id])
     }
-  }
-
-  const isExistsFile = fileId => {
-    return !!files[fileId]
   }
 
   const tabClick = fileID => {

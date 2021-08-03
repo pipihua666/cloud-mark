@@ -1,10 +1,10 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-18 17:00:35
- * @LastEditTime: 2021-07-18 17:02:37
+ * @LastEditTime: 2021-08-02 23:53:07
  * @LastEditors: pipihua
  * @Description: 工具函数
- * @FilePath: /cloud-mark/src/utils/hepler.js
+ * @FilePath: /cloud-mark/src/utils/helper.js
  * 佛祖保佑永无BUG
  */
 
@@ -17,4 +17,15 @@ const flattenArr = (arr = {}) => {
 
 const objToArr = (obj = {}) => Object.values(obj)
 
-export { flattenArr, objToArr }
+const getNodeParent = (node = null, parentClass = '') => {
+  let current = node
+  while (current) {
+    if (current.classList.contains(parentClass)) {
+      return current
+    }
+    current = current.parentNode
+  }
+  return null
+}
+
+export { flattenArr, objToArr, getNodeParent }

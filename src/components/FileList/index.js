@@ -3,6 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash, faTimes } from '@fortawesome/free-solid-svg-icons'
 import { faMarkdown } from '@fortawesome/free-brands-svg-icons'
 import PropTypes from 'prop-types'
+
+import { getNodeParent } from '../../utils/helper'
+import useContextMenu from '../../hooks/useContextMenu'
 import useKeyPress from '../../hooks/useKeyPress'
 
 const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
@@ -12,6 +15,43 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
   const isEnterPress = useKeyPress(13)
   const isESCPress = useKeyPress(27)
   const editItem = files.find(file => file.id === editFileId)
+
+  // 上下文菜单
+  useContextMenu(
+    [
+      {
+        label: '打开',
+        click: clickedElement => {
+          const parentNode = getNodeParent(clickedElement, 'file-item')
+          if (parentNode) {
+            onFileClick(parentNode.dataset.id)
+          }
+        }
+      },
+      {
+        label: '重命名',
+        click: clickedElement => {
+          const parentNode = getNodeParent(clickedElement, 'file-item')
+          if (parentNode) {
+            const { id = '', title = '' } = parentNode.dataset
+            renameFile({ id, title })
+          }
+        }
+      },
+      {
+        label: '删除',
+        click: clickedElement => {
+          const parentNode = getNodeParent(clickedElement, 'file-item')
+          if (parentNode) {
+            const { id = '', title = '' } = parentNode.dataset
+            deleteFile({ id, title })
+          }
+        }
+      }
+    ],
+    '.file-list',
+    [files]
+  )
 
   const onCloseSearch = () => {
     setEditFileId('')
@@ -40,6 +80,16 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
     }
   }, [files])
 
+  const renameFile = (file = {}) => {
+    setEditFileId(file.id)
+    setValue(file.title)
+  }
+
+  const deleteFile = (file = {}) => {
+    onFileDelete(file.id)
+    setValue(file.title)
+  }
+
   // 编辑状态自动聚焦
   useEffect(() => {
     if (editFileId) {
@@ -47,13 +97,15 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
     }
   }, [editFileId])
   return (
-    <ul className="list-group list-group-flush">
+    <ul className="list-group list-group-flush file-list">
       {Array.isArray(files) &&
         files.length > 0 &&
         files.map(file => (
           <li
             key={file.id}
             className="list-group-item file-item bg-light d-flex align-items-center row mx-0"
+            data-title={file.title}
+            data-id={file.id}
           >
             {editFileId === file.id || file.isNew ? (
               <>
@@ -89,19 +141,13 @@ const FileList = ({ files, onFileClick, onSaveEdit, onFileDelete }) => {
                 </span>
                 <button
                   className="icon-button col-1"
-                  onClick={() => {
-                    setEditFileId(file.id)
-                    setValue(file.title)
-                  }}
+                  onClick={() => renameFile(file)}
                 >
                   <FontAwesomeIcon icon={faEdit} title="编辑" />
                 </button>
                 <button
                   className="icon-button col-1"
-                  onClick={() => {
-                    onFileDelete(file.id)
-                    setValue(file.title)
-                  }}
+                  onClick={() => deleteFile(file)}
                 >
                   <FontAwesomeIcon icon={faTrash} title="删除" />
                 </button>
