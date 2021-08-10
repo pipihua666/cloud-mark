@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-03 23:54:24
+ * @LastEditTime: 2021-08-10 23:24:32
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -10,7 +10,7 @@
 import { useState } from 'react'
 import ButtonBtn from './components/ButtonBtn'
 import { v4 as uuidv4 } from 'uuid'
-import { faPlus, faFileImport, faSave } from '@fortawesome/free-solid-svg-icons'
+import { faPlus, faFileImport } from '@fortawesome/free-solid-svg-icons'
 import SimpleMDE from 'react-simplemde-editor'
 import 'easymde/dist/easymde.min.css'
 
@@ -27,6 +27,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 const { join, basename, dirname, extname } = window.require('path')
 const { app, dialog } = window.require('@electron/remote')
 const Store = window.require('electron-store')
+const settingsStore = new Store({ name: 'PathSetting' })
 
 const fileStore = new Store({ name: 'FileData' })
 
@@ -61,7 +62,8 @@ function App() {
   // TabList,FileList使用数组
   const filesArr = objToArr(files)
   const fileListArr = searchedFiles?.length > 0 ? searchedFiles : filesArr
-  const saveLocation = app.getPath('documents')
+  const saveLocation =
+    settingsStore.get('savedFileLocation') || app.getPath('documents')
 
   const fileChange = (id, value) => {
     if (value !== files[id].body) {
