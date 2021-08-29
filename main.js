@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:42:48
- * @LastEditTime: 2021-08-10 23:07:57
+ * @LastEditTime: 2021-08-29 23:16:32
  * @LastEditors: pipihua
  * @Description: electron主进程
  * @FilePath: /cloud-mark/main.js
@@ -13,6 +13,9 @@ const path = require('path')
 const AppWindow = require('./AppWindow')
 const menuTemplate = require('./template/menuTemplate')
 const Store = require('electron-store')
+
+const settingsStore = new Store({ name: 'PathSetting' })
+
 // 10以上的版本需要初始化
 Store.initRenderer()
 
@@ -46,5 +49,19 @@ app.on('ready', () => {
       settingWindow.webContents.openDevTools({ mode: 'bottom' })
     })
     settingWindow.removeMenu()
+  })
+
+  ipcMain.on('qiniu-config-is-saved', () => {
+    let qiniuMenu =
+      process.platform === 'darwin' ? menu.items[5] : menu.items[4]
+    const switchItems = toggle => {
+      [1, 2, 3].forEach(index => {
+        qiniuMenu.submenu.items[index].enabled = toggle
+      })
+    }
+    const qiniuIsConfiged = ['accessKey', 'secretKey', 'bucketName'].every(
+      key => !!settingsStore.get(key)
+    )
+    switchItems(qiniuIsConfiged)
   })
 })

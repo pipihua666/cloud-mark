@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-08-03 23:15:06
- * @LastEditTime: 2021-08-03 23:16:39
+ * @LastEditTime: 2021-08-29 22:59:16
  * @LastEditors: pipihua
  * @Description: 菜单模板
  * @FilePath: /cloud-mark/template/menuTemplate.js
@@ -9,6 +9,15 @@
  */
 
 const { app, shell, ipcMain } = require('electron')
+const Store = require('electron-store')
+
+const settingsStore = new Store({ name: 'PathSetting' })
+
+const qiniuIsConfiged = ['accessKey', 'secretKey', 'bucketName'].every(
+  key => !!settingsStore.get(key)
+)
+
+const enableAutoSync = settingsStore.get('enableAutoSync')
 
 let template = [
   {
@@ -128,6 +137,39 @@ let template = [
         label: '关闭',
         accelerator: 'CmdOrCtrl+W',
         role: 'close'
+      }
+    ]
+  },
+  {
+    label: '云同步',
+    submenu: [
+      {
+        label: '设置',
+        accelerator: 'CmdOrCtrl+,',
+        click: () => {
+          ipcMain.emit('open-settings-window')
+        }
+      },
+      {
+        label: '自动同步',
+        type: 'checkbox',
+        enabled: qiniuIsConfiged,
+        checked: enableAutoSync,
+        click: () => {
+          settingsStore.set('enableAutoSync', !enableAutoSync)
+        }
+      },
+      {
+        label: '全部同步至云端',
+        enabled: qiniuIsConfiged,
+        click: () => {
+          ipcMain.emit('upload-all-to-qiniu')
+        }
+      },
+      {
+        label: '从云端下载到本地',
+        enabled: qiniuIsConfiged,
+        click: () => {}
       }
     ]
   },
