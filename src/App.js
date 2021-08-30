@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-10 23:24:32
+ * @LastEditTime: 2021-08-30 22:44:17
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -18,7 +18,7 @@ import FileHeader from './components/FileSearch'
 import TabList from './components/TabList'
 import FileList from './components/FileList'
 import fileHelper from './utils/fileHelper'
-import { objToArr, flattenArr } from './utils/helper'
+import { objToArr, flattenArr, timestampToString } from './utils/helper'
 import useIpcRenderer from './hooks/useIpcRenderer'
 
 import './App.css'
@@ -26,19 +26,27 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 const { join, basename, dirname, extname } = window.require('path')
 const { app, dialog } = window.require('@electron/remote')
+const { ipcRenderer } = window.require('electron')
 const Store = window.require('electron-store')
 const settingsStore = new Store({ name: 'PathSetting' })
 
 const fileStore = new Store({ name: 'FileData' })
 
+const getAutoSync = () =>
+  ['accessKey', 'secretKey', 'bucketName', 'enableAutoSync'].every(
+    key => !!settingsStore.get(key)
+  )
+
 const saveFilesToStore = (files = {}) => {
   const fileStoreObj = objToArr(files).reduce((result, currentFile) => {
-    const { id, title, path, createdAt } = currentFile
+    const { id, title, path, createdAt, isSynced, updatedAt } = currentFile
     result[id] = {
       id,
       path,
       title,
-      createdAt
+      createdAt,
+      isSynced,
+      updatedAt
     }
     return result
   }, {})
@@ -182,8 +190,15 @@ function App() {
   }
 
   const saveCurrentFile = () => {
-    fileHelper.writeFile(activeFile.path, activeFile.body).then(() => {
-      setUnsavedFileIDs(filesArr.filter(id => id !== activeFile.id))
+    const { path, body, title } = activeFile
+    fileHelper.writeFile(path, body).then(() => {
+      setUnsavedFileIDs(filesArr.filter(id => activeFile.id !== id))
+      if (getAutoSync()) {
+        ipcRenderer.send('upload-file', {
+          key: `${title}.md`,
+          path
+        })
+      }
     })
   }
 
@@ -231,10 +246,23 @@ function App() {
       })
   }
 
+  const activeFileUploaded = () => {
+    const { id } = activeFile
+    const modifiedFile = {
+      ...files[id],
+      isSynced: true,
+      updatedAt: new Date().getTime()
+    }
+    const newFiles = { ...files, [id]: modifiedFile }
+    setFiles(newFiles)
+    saveFilesToStore(newFiles)
+  }
+
   useIpcRenderer({
     'create-new-file': createNewFile,
     'import-file': importFile,
-    'save-edit-file': saveCurrentFile
+    'save-edit-file': saveCurrentFile,
+    'active-file-uploaded': activeFileUploaded
   })
 
   return (
@@ -283,6 +311,11 @@ function App() {
                   fileChange(activeFile.id, value)
                 }}
               />
+              {activeFile.isSynced && (
+                <span className="sync-status">
+                  上次同步于:{timestampToString(activeFile.updatedAt)}
+                </span>
+              )}
             </>
           )}
         </div>

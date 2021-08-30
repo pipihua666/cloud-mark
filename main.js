@@ -1,18 +1,19 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:42:48
- * @LastEditTime: 2021-08-29 23:16:32
+ * @LastEditTime: 2021-08-30 22:36:20
  * @LastEditors: pipihua
  * @Description: electron主进程
  * @FilePath: /cloud-mark/main.js
  * 佛祖保佑永无BUG
  */
-const { app, globalShortcut, Menu, ipcMain } = require('electron')
+const { app, globalShortcut, Menu, ipcMain, dialog } = require('electron')
 const isDev = require('electron-is-dev')
 const path = require('path')
 const AppWindow = require('./AppWindow')
 const menuTemplate = require('./template/menuTemplate')
 const Store = require('electron-store')
+const QiniuManager = require('./src/utils/QiniuManager')
 
 const settingsStore = new Store({ name: 'PathSetting' })
 
@@ -21,6 +22,13 @@ Store.initRenderer()
 
 // 12版本的electron已经去抽了5版本的remote
 require('@electron/remote/main').initialize()
+
+const createQiniuManager = () => {
+  const accessKey = settingsStore.get('accessKey')
+  const secretKey = settingsStore.get('secretKey')
+  const bucketName = settingsStore.get('bucketName')
+  return new QiniuManager(accessKey, secretKey, bucketName)
+}
 
 app.on('ready', () => {
   const mainConfig = {
@@ -51,11 +59,24 @@ app.on('ready', () => {
     settingWindow.removeMenu()
   })
 
+  // auto sync
+  ipcMain.on('upload-file', (event, data) => {
+    const manager = createQiniuManager()
+    manager
+      .uploadFile(data.key, data.path)
+      .then(() => {
+        mainWindow.webContents.send('active-file-uploaded')
+      })
+      .catch(() => {
+        dialog.showErrorBox('同步出错', '请检查七牛云配置是否正确！')
+      })
+  })
+
   ipcMain.on('qiniu-config-is-saved', () => {
     let qiniuMenu =
       process.platform === 'darwin' ? menu.items[5] : menu.items[4]
     const switchItems = toggle => {
-      [1, 2, 3].forEach(index => {
+      ;[1, 2, 3].forEach(index => {
         qiniuMenu.submenu.items[index].enabled = toggle
       })
     }

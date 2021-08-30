@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-18 17:00:35
- * @LastEditTime: 2021-08-02 23:53:07
+ * @LastEditTime: 2021-08-30 22:43:20
  * @LastEditors: pipihua
  * @Description: 工具函数
  * @FilePath: /cloud-mark/src/utils/helper.js
@@ -28,4 +28,9 @@ const getNodeParent = (node = null, parentClass = '') => {
   return null
 }
 
-export { flattenArr, objToArr, getNodeParent }
+const timestampToString = timestamp => {
+  const date = new Date(timestamp)
+  return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+}
+
+export { flattenArr, objToArr, getNodeParent, timestampToString }
