@@ -1,7 +1,7 @@
 /*
  * @Author: pipihua
  * @Date: 2021-07-08 22:40:53
- * @LastEditTime: 2021-08-30 22:44:17
+ * @LastEditTime: 2021-08-31 23:25:56
  * @LastEditors: pipihua
  * @Description: 主应用
  * @FilePath: /cloud-mark/src/App.js
@@ -17,6 +17,7 @@ import 'easymde/dist/easymde.min.css'
 import FileHeader from './components/FileSearch'
 import TabList from './components/TabList'
 import FileList from './components/FileList'
+import Loader from './components/Loader'
 import fileHelper from './utils/fileHelper'
 import { objToArr, flattenArr, timestampToString } from './utils/helper'
 import useIpcRenderer from './hooks/useIpcRenderer'
@@ -101,11 +102,16 @@ function App() {
     }
     // set file body
     const currentFile = files[fileID]
-    if (!currentFile.isLoaded) {
-      fileHelper.readFile(currentFile.path).then(value => {
-        const newFile = { ...currentFile, isLoaded: true, body: value }
-        setFiles({ ...files, [fileID]: newFile })
-      })
+    const { id, title, path, isLoaded } = currentFile
+    if (!isLoaded) {
+      if (getAutoSync()) {
+        ipcRenderer.send('download-file', { key: `${title}.md`, path, id })
+      } else {
+        fileHelper.readFile(currentFile.path).then(value => {
+          const newFile = { ...files[fileID], body: value, isLoaded: true }
+          setFiles({ ...files, [fileID]: newFile })
+        })
+      }
     }
   }
 
@@ -258,11 +264,49 @@ function App() {
     saveFilesToStore(newFiles)
   }
 
+  const activeFileDownloaded = (event, message) => {
+    const currentFile = files[message.id]
+    const { id, path } = currentFile
+    fileHelper.readFile(path).then(value => {
+      let newFile
+      if (message.status === 'download-success') {
+        newFile = {
+          ...files[id],
+          body: value,
+          isLoaded: true,
+          isSynced: true,
+          updatedAt: new Date().getTime()
+        }
+      } else {
+        newFile = { ...files[id], body: value, isLoaded: true }
+      }
+      const newFiles = { ...files, [id]: newFile }
+      setFiles(newFiles)
+      saveFilesToStore(newFiles)
+    })
+  }
+
+  const filesUploaded = () => {
+    const newFiles = objToArr(files).reduce((result, file) => {
+      const currentTime = new Date().getTime()
+      result[file.id] = {
+        ...files[file.id],
+        isSynced: true,
+        updatedAt: currentTime
+      }
+      return result
+    }, {})
+    setFiles(newFiles)
+    saveFilesToStore(newFiles)
+  }
+
   useIpcRenderer({
     'create-new-file': createNewFile,
     'import-file': importFile,
     'save-edit-file': saveCurrentFile,
-    'active-file-uploaded': activeFileUploaded
+    'active-file-uploaded': activeFileUploaded,
+    'file-downloaded': activeFileDownloaded,
+    'files-uploaded': filesUploaded
   })
 
   return (
